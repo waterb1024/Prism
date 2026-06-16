@@ -1,0 +1,37 @@
+{
+  "name": "notepad",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev -p 8080",
+    "build": "next build",
+    "start": "next start -p ${PORT:-8080}",
+    "lint": "next lint",
+    "db:migrate": "tsx --env-file=.env scripts/migrate.ts"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "@tiptap/extension-link": "^2.10.3",
+    "@tiptap/extension-placeholder": "^2.10.3",
+    "@tiptap/extension-task-item": "^2.10.3",
+    "@tiptap/extension-task-list": "^2.10.3",
+    "@tiptap/extension-typography": "^2.10.3",
+    "@tiptap/pm": "^2.10.3",
+    "@tiptap/react": "^2.10.3",
+    "@tiptap/starter-kit": "^2.10.3",
+    "next": "^16.2.9",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
