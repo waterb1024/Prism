@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import type { ProductHuntResearchData } from "@/lib/types";
+import type {
+  MarketSize,
+  ProductHuntResearchData,
+  ResearchCommonality,
+  ResearchOpportunity,
+  ResearchTheme,
+  FastestValidation,
+} from "@/lib/types";
 
 type IngestBody = Partial<ProductHuntResearchData> & { report_date?: string };
 
@@ -16,16 +23,80 @@ function todayYmd(): string {
   return `${y}-${m}-${day}`;
 }
 
+function normalizeMarket(v: unknown): MarketSize {
+  const empty: MarketSize = { segments: [], koreaContext: "" };
+  if (!v || typeof v !== "object") return empty;
+  const m = v as Partial<MarketSize>;
+  return {
+    segments: Array.isArray(m.segments) ? m.segments : [],
+    koreaContext: typeof m.koreaContext === "string" ? m.koreaContext : "",
+  };
+}
+
+function normalizeThemes(v: unknown): ResearchTheme[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((t) => {
+    const th = t as Partial<ResearchTheme>;
+    return {
+      name: typeof th.name === "string" ? th.name : "",
+      narrative: typeof th.narrative === "string" ? th.narrative : undefined,
+      services: Array.isArray(th.services) ? th.services : [],
+      problemStatement: typeof th.problemStatement === "string" ? th.problemStatement : "",
+    };
+  });
+}
+
+function normalizeCommonalities(v: unknown): ResearchCommonality[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((c, i) => {
+    const co = c as Partial<ResearchCommonality>;
+    return {
+      order: typeof co.order === "number" ? co.order : i + 1,
+      headline: typeof co.headline === "string" ? co.headline : "",
+      elaboration: typeof co.elaboration === "string" ? co.elaboration : "",
+    };
+  });
+}
+
+function normalizeOpportunities(v: unknown): ResearchOpportunity[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((o) => {
+    const op = o as Partial<ResearchOpportunity>;
+    return {
+      rank: typeof op.rank === "number" ? op.rank : 0,
+      title: typeof op.title === "string" ? op.title : "",
+      difficultyStars:
+        typeof op.difficultyStars === "number"
+          ? Math.max(1, Math.min(5, Math.round(op.difficultyStars)))
+          : 3,
+      opportunityScore:
+        typeof op.opportunityScore === "number"
+          ? Math.max(1, Math.min(10, op.opportunityScore))
+          : 5,
+      ridingTrend: typeof op.ridingTrend === "string" ? op.ridingTrend : "",
+      koreaGap: typeof op.koreaGap === "string" ? op.koreaGap : "",
+      description: typeof op.description === "string" ? op.description : undefined,
+      relatedServices: Array.isArray(op.relatedServices) ? op.relatedServices : [],
+    };
+  });
+}
+
+function normalizeValidation(v: unknown): FastestValidation | undefined {
+  if (!v || typeof v !== "object") return undefined;
+  const fv = v as Partial<FastestValidation>;
+  if (typeof fv.targetRank !== "number" || typeof fv.rationale !== "string") return undefined;
+  return { targetRank: fv.targetRank, rationale: fv.rationale };
+}
+
 function normalize(body: IngestBody): ProductHuntResearchData {
   return {
-    collectionSummary: body.collectionSummary ?? "",
-    serviceList: Array.isArray(body.serviceList) ? body.serviceList : [],
-    commonalities: Array.isArray(body.commonalities) ? body.commonalities : [],
-    marketSize: body.marketSize ?? "",
-    top5Opportunities: Array.isArray(body.top5Opportunities)
-      ? body.top5Opportunities
-      : [],
-    notes: body.notes ?? "",
+    collectionSummary: typeof body.collectionSummary === "string" ? body.collectionSummary : "",
+    themes: normalizeThemes(body.themes),
+    commonalities: normalizeCommonalities(body.commonalities),
+    marketSize: normalizeMarket(body.marketSize),
+    top5Opportunities: normalizeOpportunities(body.top5Opportunities),
+    fastestValidation: normalizeValidation(body.fastestValidation),
+    notes: typeof body.notes === "string" ? body.notes : "",
   };
 }
 

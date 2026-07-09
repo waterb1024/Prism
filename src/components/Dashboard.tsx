@@ -29,7 +29,21 @@ function daysAgo(unix: number): string {
   return `${Math.floor(diff / 7)}주 전`;
 }
 
-const BAR_PALETTE = ["#059669", "#0891b2", "#7c3aed", "#db2777", "#ea580c", "#65a30d", "#0284c7", "#a16207"];
+const BAR_PALETTE = [
+  "#059669",
+  "#0891b2",
+  "#7c3aed",
+  "#db2777",
+  "#ea580c",
+  "#65a30d",
+  "#0284c7",
+  "#a16207",
+];
+
+function stars(n: number | null): string {
+  if (n == null) return "";
+  return "★".repeat(n) + "☆".repeat(Math.max(0, 5 - n));
+}
 
 export default function Dashboard() {
   const [reports, setReports] = useState<WeeklyReportSummary[] | null>(null);
@@ -54,34 +68,33 @@ export default function Dashboard() {
     const lastDate = reports[0]?.report_date ?? null;
     const totalServices = reports.reduce((sum, r) => sum + r.serviceCount, 0);
 
-    const themeCounts = new Map<string, number>();
-    for (const r of reports) {
-      for (const t of r.allCommonalities) {
-        const key = t.trim();
-        if (!key) continue;
-        themeCounts.set(key, (themeCounts.get(key) ?? 0) + 1);
+    function bucket(pick: (r: WeeklyReportSummary) => string[]) {
+      const counts = new Map<string, number>();
+      for (const r of reports!) {
+        for (const t of pick(r)) {
+          const key = t.trim();
+          if (!key) continue;
+          counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
       }
+      return [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, count]) => ({ label, count }));
     }
-    const themesRanked = [...themeCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([theme, count]) => ({ theme, count }));
+
+    const themes = bucket((r) => r.themeNames);
+    const commonalities = bucket((r) => r.commonalityHeadlines);
+    const segments = bucket((r) => r.marketSegmentNames);
 
     const trend = [...reports]
       .sort((a, b) => a.report_date.localeCompare(b.report_date))
       .map((r) => ({
         date: r.report_date.slice(5),
         서비스: r.serviceCount,
-        테마: r.allCommonalities.length,
+        테마: r.themeCount,
       }));
 
-    return {
-      total,
-      lastDate,
-      totalServices,
-      topThemes: themesRanked.slice(0, 8),
-      themesRanked,
-      trend,
-    };
+    return { total, lastDate, totalServices, themes, commonalities, segments, trend };
   }, [reports]);
 
   const handleLogout = useCallback(async () => {
@@ -127,14 +140,10 @@ export default function Dashboard() {
             value={aggregate.lastDate ?? "—"}
             valueClassName="text-lg md:text-xl"
           />
-          <Kpi
-            label="추적 중인 테마"
-            value={aggregate.themesRanked.length}
-            hint="누적 고유 개수"
-          />
+          <Kpi label="추적 테마" value={aggregate.themes.length} hint="누적 고유 개수" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           <ChartCard title="📈 주간 수집량 추이">
             {hasEnoughForTrend ? (
               <ResponsiveContainer width="100%" height={220}>
@@ -165,31 +174,28 @@ export default function Dashboard() {
           </ChartCard>
 
           <ChartCard title="🏆 반복 등장 테마 (상위 8)">
-            {aggregate.topThemes.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart
-                  data={aggregate.topThemes}
-                  layout="vertical"
-                  margin={{ top: 4, right: 12, left: 8, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                  <XAxis type="number" tick={{ fontSize: 11 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="theme"
-                    tick={{ fontSize: 11 }}
-                    width={110}
-                  />
-                  <Tooltip contentStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                    {aggregate.topThemes.map((_, i) => (
-                      <Cell key={i} fill={BAR_PALETTE[i % BAR_PALETTE.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            {aggregate.themes.length > 0 ? (
+              <HorizontalBar data={aggregate.themes.slice(0, 8)} />
             ) : (
-              <EmptyChart hint="테마가 아직 수집되지 않았어요." />
+              <EmptyChart hint="테마가 아직 없어요." />
+            )}
+          </ChartCard>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+          <ChartCard title="💡 반복 등장 공통점 (상위 6)">
+            {aggregate.commonalities.length > 0 ? (
+              <HorizontalBar data={aggregate.commonalities.slice(0, 6)} />
+            ) : (
+              <EmptyChart hint="공통점이 아직 없어요." />
+            )}
+          </ChartCard>
+
+          <ChartCard title="📊 언급된 시장 세그먼트 (상위 8)">
+            {aggregate.segments.length > 0 ? (
+              <HorizontalBar data={aggregate.segments.slice(0, 8)} />
+            ) : (
+              <EmptyChart hint="세그먼트가 아직 없어요." />
             )}
           </ChartCard>
         </div>
@@ -217,24 +223,34 @@ export default function Dashboard() {
                   {r.collectionSummary || "요약 없음"}
                 </p>
                 {r.topOpportunityTitle && (
-                  <div className="mt-3 text-xs text-neutral-600">
-                    🚀 1위 — {r.topOpportunityTitle}
+                  <div className="mt-3 flex items-center gap-2 text-xs">
+                    <span className="text-neutral-600">🚀 1위 — {r.topOpportunityTitle}</span>
                   </div>
                 )}
-                {r.topThemes.length > 0 && (
+                {r.topOpportunityStars != null && (
+                  <div className="mt-1 text-xs text-amber-600">
+                    난이도 <span className="tracking-tight">{stars(r.topOpportunityStars)}</span>
+                  </div>
+                )}
+                {r.themeNames.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {r.topThemes.map((t) => (
+                    {r.themeNames.slice(0, 3).map((t) => (
                       <span
                         key={t}
-                        className="text-[10px] bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded"
+                        className="text-[10px] bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded truncate max-w-[140px]"
                       >
                         {t}
                       </span>
                     ))}
+                    {r.themeNames.length > 3 && (
+                      <span className="text-[10px] text-neutral-400">
+                        +{r.themeNames.length - 3}
+                      </span>
+                    )}
                   </div>
                 )}
                 <div className="mt-3 text-[10px] text-neutral-400 flex justify-between">
-                  <span>수집 {r.serviceCount}개</span>
+                  <span>테마 {r.themeCount} · 서비스 {r.serviceCount}</span>
                   <span>{formatDate(r.created_at)}</span>
                 </div>
               </Link>
@@ -280,5 +296,33 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 function EmptyChart({ hint }: { hint: string }) {
   return (
     <div className="h-[220px] grid place-items-center text-xs text-neutral-400">{hint}</div>
+  );
+}
+
+function HorizontalBar({ data }: { data: Array<{ label: string; count: number }> }) {
+  return (
+    <ResponsiveContainer width="100%" height={220}>
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 4, right: 12, left: 8, bottom: 0 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+        <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+        <YAxis
+          type="category"
+          dataKey="label"
+          tick={{ fontSize: 10 }}
+          width={140}
+          interval={0}
+        />
+        <Tooltip contentStyle={{ fontSize: 12 }} />
+        <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+          {data.map((_, i) => (
+            <Cell key={i} fill={BAR_PALETTE[i % BAR_PALETTE.length]} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
   );
 }

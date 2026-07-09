@@ -1,49 +1,60 @@
-export type Notebook = {
-  id: number;
+export type ThemeService = {
   name: string;
-  created_at: number;
-  updated_at: number;
-  note_count?: number;
+  tag: string;
+  upvotes?: number;
+  websiteUrl?: string;
+  iconUrl?: string;
+  productHuntUrl?: string;
 };
 
-export type Note = {
-  id: number;
-  notebook_id: number | null;
-  title: string;
-  content: string;
-  plain_text: string;
-  pinned: 0 | 1;
-  archived: 0 | 1;
-  created_at: number;
-  updated_at: number;
+export type ResearchTheme = {
+  name: string;
+  narrative?: string;
+  services: ThemeService[];
+  problemStatement: string;
 };
 
-export type NoteSummary = Pick<
-  Note,
-  "id" | "notebook_id" | "title" | "plain_text" | "pinned" | "updated_at" | "created_at"
->;
+export type ResearchCommonality = {
+  order: number;
+  headline: string;
+  elaboration: string;
+};
 
-export type ResearchService = {
+export type MarketSegment = {
   name: string;
-  tagline: string;
-  problem: string;
-  category?: string;
+  size2024: string;
+  size2030: string;
+  cagr?: string;
+};
+
+export type MarketSize = {
+  segments: MarketSegment[];
+  koreaContext: string;
 };
 
 export type ResearchOpportunity = {
   rank: number;
   title: string;
+  difficultyStars: number;
+  opportunityScore: number;
+  ridingTrend: string;
+  koreaGap: string;
+  description?: string;
+  relatedServices?: string[];
+};
+
+export type FastestValidation = {
+  targetRank: number;
   rationale: string;
-  difficultyNotes: string;
-  estimatedWeeks?: number;
 };
 
 export type ProductHuntResearchData = {
   collectionSummary: string;
-  serviceList: ResearchService[];
-  commonalities: string[];
-  marketSize: string;
+  themes: ResearchTheme[];
+  commonalities: ResearchCommonality[];
+  marketSize: MarketSize;
   top5Opportunities: ResearchOpportunity[];
+  fastestValidation?: FastestValidation;
   notes: string;
 };
 
@@ -59,9 +70,13 @@ export type WeeklyReportSummary = {
   id: number;
   report_date: string;
   collectionSummary: string;
-  topThemes: string[];
-  allCommonalities: string[];
-  topOpportunityTitle: string | null;
+  themeCount: number;
   serviceCount: number;
+  themeNames: string[];
+  commonalityHeadlines: string[];
+  marketSegmentNames: string[];
+  topOpportunityTitle: string | null;
+  topOpportunityStars: number | null;
+  fastestValidationTitle: string | null;
   created_at: number;
 };
