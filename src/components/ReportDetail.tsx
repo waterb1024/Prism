@@ -14,8 +14,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  ZAxis,
-  LabelList,
 } from "recharts";
 import type { MarketSegment, ThemeService, WeeklyReport } from "@/lib/types";
 import ServiceIcon from "./ServiceIcon";
@@ -61,6 +59,42 @@ function biggestMarketLabel(segs: MarketSegment[]): { name: string; value: strin
     }
   }
   return best;
+}
+
+type ScatterDotProps = {
+  cx?: number;
+  cy?: number;
+  fill?: string;
+  payload?: { rank: number };
+};
+
+function RankedDot(props: ScatterDotProps) {
+  const { cx, cy, fill, payload } = props;
+  if (cx == null || cy == null || !payload) return null;
+  return (
+    <g>
+      <circle
+        cx={cx}
+        cy={cy}
+        r={16}
+        fill={fill}
+        stroke="#ffffff"
+        strokeWidth={2.5}
+      />
+      <text
+        x={cx}
+        y={cy}
+        dy=".33em"
+        textAnchor="middle"
+        fill="#ffffff"
+        fontSize={13}
+        fontWeight={700}
+        style={{ pointerEvents: "none" }}
+      >
+        {payload.rank}
+      </text>
+    </g>
+  );
 }
 
 function ScoreDots({ value, max = 5, tone = "accent" }: { value: number; max?: number; tone?: "accent" | "ink" }) {
@@ -562,6 +596,27 @@ export default function ReportDetail({ id }: Props) {
           ) : (
             <div className="space-y-4">
               <div className="card">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-xs text-neutral-500">
+                    좌상단이 <span style={{ color: ACCENT, fontWeight: 600 }}>스위트 스팟</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[11px] text-neutral-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ background: ACCENT }}
+                      />
+                      1위
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ background: INK }}
+                      />
+                      2~5위
+                    </span>
+                  </div>
+                </div>
                 <div className="h-[300px] md:h-[280px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart margin={{ top: 20, right: 24, left: 4, bottom: 48 }}>
@@ -571,11 +626,11 @@ export default function ReportDetail({ id }: Props) {
                       y1={5}
                       y2={10}
                       fill={ACCENT}
-                      fillOpacity={0.06}
+                      fillOpacity={0.1}
                     />
-                    <CartesianGrid strokeDasharray="3 3" stroke={LINE} />
-                    <ReferenceLine x={3} stroke={LINE} strokeDasharray="4 4" />
-                    <ReferenceLine y={5} stroke={LINE} strokeDasharray="4 4" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={LINE} vertical={false} />
+                    <ReferenceLine x={3} stroke="#cbd5e1" strokeDasharray="4 4" />
+                    <ReferenceLine y={5} stroke="#cbd5e1" strokeDasharray="4 4" />
                     <XAxis
                       type="number"
                       dataKey="difficulty"
@@ -611,7 +666,6 @@ export default function ReportDetail({ id }: Props) {
                         fill: MUTED,
                       }}
                     />
-                    <ZAxis range={[320, 320]} />
                     <Tooltip
                       cursor={{ strokeDasharray: "3 3" }}
                       contentStyle={{
@@ -644,16 +698,10 @@ export default function ReportDetail({ id }: Props) {
                         );
                       }}
                     />
-                    <Scatter data={scatterData}>
+                    <Scatter data={scatterData} shape={<RankedDot />}>
                       {scatterData.map((d) => (
                         <Cell key={d.rank} fill={d.rank === 1 ? ACCENT : INK} />
                       ))}
-                      <LabelList
-                        dataKey="rank"
-                        position="top"
-                        offset={10}
-                        style={{ fontSize: 12, fontWeight: 700, fill: INK }}
-                      />
                     </Scatter>
                   </ScatterChart>
                 </ResponsiveContainer>
