@@ -1,28 +1,25 @@
 export default function Logo({ size = 22 }: { size?: number }) {
+  const mark = Math.round(size * 1.05);
   return (
     <span className="inline-flex items-center gap-2 select-none">
       <svg
-        width={size}
-        height={size}
+        width={mark}
+        height={mark}
         viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
         aria-hidden="true"
       >
-        <path d="M7 4 L18 12 L7 20 Z" />
-        <line x1="19.5" y1="9" x2="22" y2="9" />
-        <line x1="19.5" y1="12" x2="22" y2="12" />
-        <line x1="19.5" y1="15" x2="22" y2="15" />
+        <rect x="0" y="0" width="24" height="24" rx="6.5" fill="#0a0a0a" />
+        <path d="M9 6.5 L17.5 12 L9 17.5 Z" fill="#ffffff" />
       </svg>
       <span
-        className="font-bold"
         style={{
-          fontSize: size * 0.95,
-          letterSpacing: "-0.028em",
+          fontSize: size,
+          fontFamily:
+            '"Inter", "Pretendard Variable", -apple-system, BlinkMacSystemFont, sans-serif',
+          fontWeight: 800,
+          letterSpacing: "-0.032em",
           lineHeight: 1,
+          color: "#0a0a0a",
         }}
       >
         Prism

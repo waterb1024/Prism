@@ -113,7 +113,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-[100dvh]">
-      <header className="border-b border-black/[0.06] bg-[color:var(--bg)]/80 backdrop-blur-md sticky top-0 z-10">
+      <header className="bg-[color:var(--bg)]/80 backdrop-blur-md sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between gap-4">
           <div className="text-neutral-900">
             <Logo size={22} />
@@ -194,8 +194,10 @@ export default function Dashboard() {
                   <Tooltip
                     contentStyle={{
                       fontSize: 13,
-                      borderRadius: 8,
-                      border: "1px solid rgba(0,0,0,0.08)",
+                      borderRadius: 10,
+                      border: "none",
+                      boxShadow:
+                        "0 10px 30px -8px rgba(15,23,42,0.16), 0 4px 12px -2px rgba(15,23,42,0.08)",
                     }}
                   />
                   <Line
@@ -280,50 +282,59 @@ function HeroLatest({ report: r }: { report: WeeklyReportSummary }) {
   return (
     <Link
       href={`/report/${r.id}`}
-      className="card card-hover block relative overflow-hidden"
-      style={{ padding: "32px" }}
+      className="hero card-hover block relative overflow-hidden group"
     >
-      <div className="flex items-center gap-3 flex-wrap">
-        <span
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-white"
-          style={{ background: ACCENT }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-white/90" />
-          최신 리포트
-        </span>
-        <span className="text-xs text-neutral-500 tabular-nums">
-          {r.report_date} · {daysAgo(r.created_at)}
-        </span>
-      </div>
-      <h2 className="display text-3xl md:text-4xl text-neutral-900 mt-5">
-        {r.topOpportunityTitle
-          ? `이번 주 Top Pick: ${r.topOpportunityTitle}`
-          : "이번 주의 리서치"}
-      </h2>
-      {r.collectionSummary && (
-        <p className="text-base text-neutral-700 mt-4 leading-relaxed max-w-3xl line-clamp-3">
-          {r.collectionSummary}
-        </p>
-      )}
-      <div className="mt-6 flex items-center gap-6 flex-wrap text-sm">
-        {r.fastestValidationTitle && (
-          <div>
-            <div className="text-xs text-neutral-500">가장 빠른 검증</div>
-            <div className="font-semibold text-neutral-900 mt-0.5">
-              {r.fastestValidationTitle}
-            </div>
-          </div>
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none opacity-[0.04]"
+        style={{
+          background:
+            "radial-gradient(circle at 100% 0%, #059669 0%, transparent 60%)",
+        }}
+      />
+      <div className="relative">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="pill-accent">
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: ACCENT }}
+            />
+            최신 리포트
+          </span>
+          <span className="text-xs text-neutral-500 tabular-nums">
+            {r.report_date} · {daysAgo(r.created_at)}
+          </span>
+        </div>
+        <h2 className="display text-3xl md:text-4xl text-neutral-900 mt-6">
+          {r.topOpportunityTitle
+            ? `이번 주 Top Pick: ${r.topOpportunityTitle}`
+            : "이번 주의 리서치"}
+        </h2>
+        {r.collectionSummary && (
+          <p className="text-base text-neutral-700 mt-4 leading-relaxed max-w-3xl line-clamp-3">
+            {r.collectionSummary}
+          </p>
         )}
-        <div className="ml-auto flex items-center gap-4 text-xs text-neutral-500 tabular-nums">
-          <span>테마 {r.themeCount}</span>
-          <span>·</span>
-          <span>서비스 {r.serviceCount}</span>
-          <span
-            className="ml-2 font-semibold group-hover:translate-x-0.5 transition-transform"
-            style={{ color: ACCENT }}
-          >
+        <div className="mt-7 flex items-center gap-6 flex-wrap text-sm">
+          {r.fastestValidationTitle && (
+            <div>
+              <div className="text-xs text-neutral-500">가장 빠른 검증</div>
+              <div className="font-semibold text-neutral-900 mt-1">
+                {r.fastestValidationTitle}
+              </div>
+            </div>
+          )}
+          <div className="ml-auto flex items-center gap-4 text-xs text-neutral-500 tabular-nums">
+            <span>테마 {r.themeCount}</span>
+            <span className="text-neutral-300">·</span>
+            <span>서비스 {r.serviceCount}</span>
+            <span
+              className="ml-2 font-semibold group-hover:translate-x-0.5 transition-transform"
+              style={{ color: ACCENT }}
+            >
             리포트 보기 →
           </span>
+        </div>
         </div>
       </div>
     </Link>
@@ -339,27 +350,38 @@ function DeltaKpi({
   value: number;
   delta: number | null;
 }) {
-  const sign = delta == null ? null : delta > 0 ? "+" : delta < 0 ? "−" : "±";
+  const arrow = delta == null ? null : delta > 0 ? "▲" : delta < 0 ? "▼" : "—";
   const abs = delta == null ? 0 : Math.abs(delta);
-  const color = delta == null ? "#a3a3a3" : delta > 0 ? ACCENT : delta < 0 ? "#dc2626" : "#a3a3a3";
+  const positive = (delta ?? 0) > 0;
+  const negative = (delta ?? 0) < 0;
+  const badgeBg = positive
+    ? "rgba(5, 150, 105, 0.10)"
+    : negative
+      ? "rgba(220, 38, 38, 0.08)"
+      : "rgba(15, 23, 42, 0.05)";
+  const badgeColor = positive
+    ? ACCENT
+    : negative
+      ? "#dc2626"
+      : "#64748b";
   return (
     <div className="card">
       <div className="text-xs text-neutral-500">{label}</div>
-      <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-3xl font-bold text-neutral-900 headline-tight tabular-nums">
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <span className="text-3xl font-bold text-neutral-900 headline-tight tabular-nums leading-none">
           {value}
         </span>
-        {sign && (
+        {arrow && (
           <span
-            className="text-sm font-semibold tabular-nums"
-            style={{ color }}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums"
+            style={{ background: badgeBg, color: badgeColor }}
           >
-            {sign}
+            {arrow}
             {abs}
           </span>
         )}
       </div>
-      <div className="text-xs text-neutral-400 mt-1">지난 주 대비</div>
+      <div className="text-xs text-neutral-400 mt-2">지난 주 대비</div>
     </div>
   );
 }
@@ -387,13 +409,11 @@ function Section({
 }) {
   return (
     <section>
-      <div className="section-rule flex items-baseline gap-4 pb-3 mb-5 flex-wrap">
+      <div className="flex items-baseline gap-3 mb-5 flex-wrap">
         <h2 className="text-xl font-bold text-neutral-900 headline-tight">
           {title}
         </h2>
-        {caption && (
-          <span className="text-xs text-neutral-500 ml-auto">{caption}</span>
-        )}
+        {caption && <span className="text-xs text-neutral-500">{caption}</span>}
       </div>
       {children}
     </section>
@@ -535,7 +555,10 @@ function ReportCardLink({ r }: { r: WeeklyReportSummary }) {
         {r.collectionSummary || "요약 없음"}
       </p>
       {r.topOpportunityTitle && (
-        <div className="mt-4 pt-4 border-t border-black/[0.06]">
+        <div
+          className="mt-4 -mx-6 px-6 py-3 rounded-lg"
+          style={{ background: "var(--bg-alt)" }}
+        >
           <div className="text-xs text-neutral-500">Top Pick</div>
           <div className="text-sm font-semibold text-neutral-900 mt-1 leading-snug">
             {r.topOpportunityTitle}
@@ -561,7 +584,7 @@ function Empty({ hint }: { hint: string }) {
 function DashboardSkeleton() {
   return (
     <main className="min-h-[100dvh]">
-      <header className="border-b border-black/[0.06] bg-white sticky top-0 z-10">
+      <header className="bg-[color:var(--bg)]/80 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-8 py-5">
           <div className="h-3 w-32 bg-black/[0.06] rounded animate-pulse" />
           <div className="h-6 w-56 bg-black/[0.06] rounded animate-pulse mt-3" />

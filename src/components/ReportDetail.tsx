@@ -194,7 +194,7 @@ export default function ReportDetail({ id }: Props) {
 
   return (
     <main className="min-h-[100dvh]">
-      <header className="border-b border-black/[0.06] bg-[color:var(--bg)]/80 backdrop-blur-md sticky top-0 z-10">
+      <header className="bg-[color:var(--bg)]/80 backdrop-blur-md sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-8 py-4 flex items-center justify-between">
           <Link
             href="/"
@@ -217,7 +217,10 @@ export default function ReportDetail({ id }: Props) {
               </svg>
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-lg border border-black/[0.08] bg-white shadow-lg overflow-hidden z-20">
+              <div
+                className="absolute right-0 mt-2 w-40 rounded-lg bg-white overflow-hidden z-20"
+                style={{ boxShadow: "var(--shadow-pop)" }}
+              >
                 <button
                   onClick={() => {
                     setMenuOpen(false);
@@ -277,39 +280,59 @@ export default function ReportDetail({ id }: Props) {
 
         {fastest && data.fastestValidation && (
           <section
-            className="card relative overflow-hidden"
+            className="hero relative overflow-hidden"
             style={{
-              background: ACCENT_SOFT,
-              borderColor: ACCENT_BORDER,
-              padding: "36px",
+              background:
+                "linear-gradient(135deg, #ecfdf5 0%, #ffffff 60%, #ffffff 100%)",
             }}
           >
-            <div className="eyebrow" style={{ color: ACCENT }}>
-              가장 빠른 검증 경로
-            </div>
-            <h2 className="display text-2xl md:text-3xl text-neutral-900 mt-3">
-              {fastest.rank}위 · {fastest.title}
-            </h2>
-            <p className="mt-3 text-base text-neutral-800 leading-relaxed max-w-3xl">
-              {data.fastestValidation.rationale}
-            </p>
-            <div className="mt-5 flex items-center gap-6 flex-wrap text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-neutral-600">난이도</span>
-                <ScoreDots value={fastest.difficultyStars} max={5} />
-                <span className="text-xs font-semibold text-neutral-800 tabular-nums">
-                  {fastest.difficultyStars}/5
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-neutral-600">기회</span>
-                <ScoreDots value={Math.round(fastest.opportunityScore / 2)} max={5} tone="accent" />
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none opacity-[0.06]"
+              style={{
+                background:
+                  "radial-gradient(circle at 100% 0%, #059669 0%, transparent 55%)",
+              }}
+            />
+            <div className="relative">
+              <span
+                className="inline-flex items-center gap-1.5 pill-accent"
+                style={{ fontSize: "12px" }}
+              >
                 <span
-                  className="text-xs font-semibold tabular-nums"
-                  style={{ color: ACCENT }}
-                >
-                  {fastest.opportunityScore}/10
-                </span>
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: ACCENT }}
+                />
+                가장 빠른 검증 경로
+              </span>
+              <h2 className="display text-2xl md:text-3xl text-neutral-900 mt-4">
+                {fastest.rank}위 · {fastest.title}
+              </h2>
+              <p className="mt-4 text-base text-neutral-700 leading-relaxed max-w-3xl">
+                {data.fastestValidation.rationale}
+              </p>
+              <div className="mt-6 flex items-center gap-8 flex-wrap text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-500">난이도</span>
+                  <ScoreDots value={fastest.difficultyStars} max={5} />
+                  <span className="text-xs font-semibold text-neutral-800 tabular-nums">
+                    {fastest.difficultyStars}/5
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-500">기회</span>
+                  <ScoreDots
+                    value={Math.round(fastest.opportunityScore / 2)}
+                    max={5}
+                    tone="accent"
+                  />
+                  <span
+                    className="text-xs font-semibold tabular-nums"
+                    style={{ color: ACCENT }}
+                  >
+                    {fastest.opportunityScore}/10
+                  </span>
+                </div>
               </div>
             </div>
           </section>
@@ -350,11 +373,16 @@ export default function ReportDetail({ id }: Props) {
                   <button
                     key={t.name}
                     onClick={() => setThemeFilter(t.name)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                       active
-                        ? "bg-neutral-900 text-white border-neutral-900 shadow-sm"
-                        : "bg-white text-neutral-700 border-black/[0.12] hover:border-neutral-900 hover:text-neutral-900"
+                        ? "bg-neutral-900 text-white shadow-sm"
+                        : "bg-white text-neutral-700 hover:text-neutral-900"
                     }`}
+                    style={
+                      active
+                        ? undefined
+                        : { boxShadow: "var(--shadow-1)" }
+                    }
                   >
                     {t.name}
                     <span
@@ -432,7 +460,7 @@ export default function ReportDetail({ id }: Props) {
                     {s.tag || "—"}
                   </p>
                   {(s.productHuntUrl || s.websiteUrl) && (
-                    <div className="flex items-center gap-4 text-xs pt-1 border-t border-black/[0.06]">
+                    <div className="flex items-center gap-4 text-xs mt-1">
                       {s.productHuntUrl && (
                         <a
                           href={s.productHuntUrl}
@@ -499,7 +527,7 @@ export default function ReportDetail({ id }: Props) {
           {data.marketSize.koreaContext && (
             <div
               className="card mb-4"
-              style={{ background: ACCENT_SOFT, borderColor: ACCENT_BORDER }}
+              style={{ background: ACCENT_SOFT }}
             >
               <div className="text-xs font-semibold tracking-wide" style={{ color: ACCENT }}>
                 한국 시장 맥락
@@ -581,8 +609,10 @@ export default function ReportDetail({ id }: Props) {
                       cursor={{ strokeDasharray: "3 3" }}
                       contentStyle={{
                         fontSize: 13,
-                        borderRadius: 8,
-                        border: "1px solid rgba(0,0,0,0.08)",
+                        borderRadius: 10,
+                        border: "none",
+                        boxShadow:
+                          "0 10px 30px -8px rgba(15,23,42,0.16), 0 4px 12px -2px rgba(15,23,42,0.08)",
                       }}
                       content={({ active, payload }) => {
                         if (!active || !payload || !payload.length) return null;
@@ -593,7 +623,10 @@ export default function ReportDetail({ id }: Props) {
                           opportunity: number;
                         };
                         return (
-                          <div className="bg-white rounded-lg border border-black/[0.08] px-3 py-2 shadow-lg">
+                          <div
+                            className="bg-white rounded-lg px-3 py-2"
+                            style={{ boxShadow: "var(--shadow-pop)" }}
+                          >
                             <div className="text-xs font-semibold text-neutral-900">
                               {p.rank}위 · {p.title}
                             </div>
@@ -634,11 +667,7 @@ export default function ReportDetail({ id }: Props) {
                       <div
                         key={o.rank}
                         className="card card-hover"
-                        style={
-                          isTop
-                            ? { background: ACCENT_SOFT, borderColor: ACCENT_BORDER }
-                            : undefined
-                        }
+                        style={isTop ? { background: ACCENT_SOFT } : undefined}
                       >
                         <div className="flex items-center justify-between gap-3 flex-wrap">
                           <div className="flex items-center gap-3">
@@ -676,17 +705,26 @@ export default function ReportDetail({ id }: Props) {
                             </div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                          <div>
-                            <div className="text-xs font-semibold text-neutral-500">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+                          <div
+                            className="rounded-lg p-4"
+                            style={{ background: isTop ? "#ffffff" : "#f8fafc" }}
+                          >
+                            <div
+                              className="text-xs font-semibold uppercase tracking-wide"
+                              style={{ color: ACCENT }}
+                            >
                               올라탄 트렌드
                             </div>
                             <p className="text-sm text-neutral-800 mt-2 leading-relaxed">
                               {o.ridingTrend || "—"}
                             </p>
                           </div>
-                          <div>
-                            <div className="text-xs font-semibold text-neutral-500">
+                          <div
+                            className="rounded-lg p-4"
+                            style={{ background: isTop ? "#ffffff" : "#f8fafc" }}
+                          >
+                            <div className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                               한국 시장 공백
                             </div>
                             <p className="text-sm text-neutral-800 mt-2 leading-relaxed">
@@ -695,17 +733,21 @@ export default function ReportDetail({ id }: Props) {
                           </div>
                         </div>
                         {o.description && (
-                          <p className="text-sm text-neutral-600 mt-4 leading-relaxed border-t border-black/[0.06] pt-4">
-                            {o.description}
-                          </p>
+                          <div className="mt-5">
+                            <div className="text-xs text-neutral-400 mb-1.5">설명</div>
+                            <p className="text-sm text-neutral-700 leading-relaxed">
+                              {o.description}
+                            </p>
+                          </div>
                         )}
                         {o.relatedServices && o.relatedServices.length > 0 && (
-                          <div className="mt-4 flex flex-wrap items-center gap-1.5">
-                            <span className="text-xs text-neutral-500 mr-1">관련</span>
+                          <div className="mt-5 flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs text-neutral-400 mr-1">관련 서비스</span>
                             {o.relatedServices.map((s) => (
                               <span
                                 key={s}
-                                className="text-xs text-neutral-700 border border-black/[0.1] rounded-md px-2 py-0.5"
+                                className="text-xs text-neutral-700 rounded-md px-2 py-0.5"
+                                style={{ background: "var(--bg-alt)" }}
                               >
                                 {s}
                               </span>
@@ -722,8 +764,8 @@ export default function ReportDetail({ id }: Props) {
 
         {data.notes && (
           <section
-            className="card"
-            style={{ background: "var(--muted)", borderColor: "transparent" }}
+            className="card-flat"
+            style={{ background: "var(--muted)" }}
           >
             <div className="text-xs font-semibold text-neutral-600">에디터 메모</div>
             <p className="whitespace-pre-line text-sm text-neutral-700 mt-3 leading-relaxed">
@@ -753,13 +795,13 @@ function Kpi({
     <div className="card">
       <div className="text-xs text-neutral-500">{label}</div>
       <div
-        className={`mt-2 font-bold text-neutral-900 headline-tight tabular-nums ${
+        className={`mt-3 font-bold text-neutral-900 headline-tight tabular-nums leading-none ${
           isText ? "text-xl" : "text-3xl"
         }`}
       >
         {value}
       </div>
-      {hint && <div className="text-xs text-neutral-500 mt-1 truncate">{hint}</div>}
+      {hint && <div className="text-xs text-neutral-500 mt-2 truncate">{hint}</div>}
     </div>
   );
 }
@@ -777,14 +819,12 @@ function Section({
 }) {
   return (
     <section>
-      <div className="section-rule flex items-baseline gap-4 pb-3 mb-5 flex-wrap">
+      <div className="flex items-baseline gap-3 mb-5 flex-wrap">
         <span className="eyebrow tabular-nums">{number}</span>
         <h2 className="text-xl font-bold text-neutral-900 headline-tight">
           {title}
         </h2>
-        {caption && (
-          <span className="text-xs text-neutral-500 ml-auto">{caption}</span>
-        )}
+        {caption && <span className="text-xs text-neutral-500">{caption}</span>}
       </div>
       {children}
     </section>
@@ -1028,7 +1068,7 @@ function Empty({ hint }: { hint: string }) {
 function ReportDetailSkeleton() {
   return (
     <main className="min-h-[100dvh]">
-      <header className="border-b border-black/[0.06] bg-white sticky top-0 z-10">
+      <header className="bg-[color:var(--bg)]/80 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-8 py-4 flex items-center justify-between">
           <div className="h-3 w-16 bg-black/[0.06] rounded animate-pulse" />
           <div className="h-3 w-24 bg-black/[0.06] rounded animate-pulse" />
