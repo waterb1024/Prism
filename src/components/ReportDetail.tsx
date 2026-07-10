@@ -562,8 +562,9 @@ export default function ReportDetail({ id }: Props) {
           ) : (
             <div className="space-y-4">
               <div className="card">
-                <ResponsiveContainer width="100%" height={260}>
-                  <ScatterChart margin={{ top: 24, right: 20, left: 20, bottom: 44 }}>
+                <div className="h-[300px] md:h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart margin={{ top: 20, right: 24, left: 4, bottom: 48 }}>
                     <ReferenceArea
                       x1={0.5}
                       x2={3}
@@ -581,12 +582,13 @@ export default function ReportDetail({ id }: Props) {
                       name="난이도"
                       domain={[0.5, 5.5]}
                       ticks={[1, 2, 3, 4, 5]}
-                      tick={{ fontSize: 13, fill: INK }}
+                      tick={{ fontSize: 12, fill: INK }}
                       stroke={LINE}
+                      height={30}
                       label={{
                         value: "난이도 →",
                         position: "insideBottom",
-                        offset: -24,
+                        offset: -28,
                         fontSize: 12,
                         fill: MUTED,
                       }}
@@ -597,18 +599,19 @@ export default function ReportDetail({ id }: Props) {
                       name="기회"
                       domain={[0, 10]}
                       ticks={[0, 2, 4, 6, 8, 10]}
-                      tick={{ fontSize: 13, fill: INK }}
+                      tick={{ fontSize: 12, fill: INK }}
                       stroke={LINE}
+                      width={44}
                       label={{
                         value: "기회 ↑",
                         angle: -90,
                         position: "insideLeft",
-                        offset: 14,
+                        offset: 16,
                         fontSize: 12,
                         fill: MUTED,
                       }}
                     />
-                    <ZAxis range={[260, 260]} />
+                    <ZAxis range={[320, 320]} />
                     <Tooltip
                       cursor={{ strokeDasharray: "3 3" }}
                       contentStyle={{
@@ -648,11 +651,13 @@ export default function ReportDetail({ id }: Props) {
                       <LabelList
                         dataKey="rank"
                         position="top"
-                        style={{ fontSize: 13, fontWeight: 600, fill: INK }}
+                        offset={10}
+                        style={{ fontSize: 12, fontWeight: 700, fill: INK }}
                       />
                     </Scatter>
                   </ScatterChart>
                 </ResponsiveContainer>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 mt-4 text-xs text-neutral-500">
                   <div>· 스위트 스팟 — 쉽고 기회 큼</div>
                   <div className="sm:text-right">· 도전 — 어렵고 기회 큼</div>
